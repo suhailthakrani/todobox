@@ -1,4 +1,4 @@
-name: Flutter CI
+name: Flutter CI/CD
 
 on:
   push:
@@ -14,45 +14,73 @@ on:
 
 jobs:
   build:
+    name: Build and Test Flutter App
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 30
+
     steps:
-      # Checkout code
+      # Checkout code with full history
       - name: Checkout code
-        uses: actions/checkout@v3
-
-      # Set up Java 17 (required by Android Gradle plugin)
-      - name: Set up Java 17
-        uses: actions/setup-java@v3
+        uses: actions/checkout@v4
         with:
+          fetch-depth: 0
+
+      # Set up Java (Adoptium/Temurin JDK 17)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
           java-version: '17'
-          distribution: 'adoptopenjdk'
+          cache: 'gradle'
 
-      # Set up Flutter with specific version
+      # Set up Flutter SDK
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@v3
         with:
-          flutter-version: '3.24.3'
+          flutter-version: '3.19.x'
+          channel: 'stable'
+          cache: true
 
-      # Cache Flutter dependencies (optional, speeds up builds)
-      - name: Cache Flutter dependencies
-        uses: actions/cache@v2
+      # Verify Flutter installation
+      - name: Verify Flutter installation
+        run: flutter doctor -v
+
+      # Clean and get dependencies
+      - name: Clean and get dependencies
+        run: |
+          flutter clean
+          flutter pub get
+
+      # Run code analysis
+      - name: Analyze code
+        run: dart analyze
+
+      # Run tests with coverage
+      - name: Run tests with coverage
+        run: |
+          flutter test --coverage
+          
+      # Build APK
+      - name: Build release APK
+        run: flutter build apk --release --split-per-abi
+
+      # Build App Bundle
+      - name: Build App Bundle
+        run: flutter build appbundle
+
+      # Upload artifacts
+      - name: Upload APK and App Bundle
+        uses: actions/upload-artifact@v4
         with:
+          name: release-artifacts
           path: |
-            ~/.pub-cache
-            build/
-          key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-flutter-
+            build/app/outputs/flutter-apk/*.apk
+            build/app/outputs/bundle/release/*.aab
+          retention-days: 5
 
-      # Install dependencies
-      - name: Install dependencies
-        run: flutter pub get
-
-      # Run tests
-      - name: Run tests
-        run: flutter test
-
-      # Build the app (optional, you can add other build types like iOS or web)
-      - name: Build APK (release)
-        run: flutter build apk --release
+      # Optional: Add a deployment step for specific branches
+      - name: Prepare Release Artifacts
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "Preparing artifacts for main branch deployment"
+          # Add any additional preparation steps here
