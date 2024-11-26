@@ -25,25 +25,27 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Set up Java (Adoptium/Temurin JDK 17)
+      # Set up Java (matching your local Java version)
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '17.0.11'
           cache: 'gradle'
 
       # Set up Flutter SDK
       - name: Set up Flutter
-        uses: subosito/flutter-action@v3
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.x'
+          flutter-version: '3.24.3'
           channel: 'stable'
-          cache: true
 
-      # Verify Flutter installation
+      # Verify Flutter and Dart versions
       - name: Verify Flutter installation
-        run: flutter doctor -v
+        run: |
+          flutter doctor -v
+          flutter --version
+          dart --version
 
       # Clean and get dependencies
       - name: Clean and get dependencies
@@ -55,32 +57,35 @@ jobs:
       - name: Analyze code
         run: dart analyze
 
-      # Run tests with coverage
-      - name: Run tests with coverage
-        run: |
-          flutter test --coverage
-          
-      # Build APK
-      - name: Build release APK
-        run: flutter build apk --release --split-per-abi
+      # Run tests 
+      - name: Run tests
+        run: flutter test
 
-      # Build App Bundle
-      - name: Build App Bundle
-        run: flutter build appbundle
+      # Build for multiple platforms
+      - name: Build release APK
+        run: |
+          flutter build apk --release --split-per-abi
+          flutter build web
+          flutter build windows
 
       # Upload artifacts
-      - name: Upload APK and App Bundle
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: release-artifacts
+          name: cross-platform-builds
           path: |
             build/app/outputs/flutter-apk/*.apk
-            build/app/outputs/bundle/release/*.aab
+            build/web/**/*
+            build/windows/x64/runner/Release/**/*
           retention-days: 5
 
-      # Optional: Add a deployment step for specific branches
+      # Prepare artifacts for main branch
       - name: Prepare Release Artifacts
         if: github.ref == 'refs/heads/main'
         run: |
           echo "Preparing artifacts for main branch deployment"
-          # Add any additional preparation steps here
+          # Additional release preparation steps
+          mkdir -p release
+          cp build/app/outputs/flutter-apk/*.apk release/
+          cp -r build/web release/web
+          cp -r build/windows/x64/runner/Release release/windows
