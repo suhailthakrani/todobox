@@ -21,13 +21,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Set up Flutter
+      # Set up Flutter with specific version
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'stable' # You can specify a version or 'stable'
+          flutter-version: '3.24.3' # Set the specific version of Flutter
 
-      # Cache Flutter dependencies (optional)
+      # Cache Flutter dependencies (optional, speeds up builds)
       - name: Cache Flutter dependencies
         uses: actions/cache@v2
         with:
@@ -38,7 +38,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-flutter-
 
-      # Install dependencies
+      # Install dependencies (flutter pub get)
       - name: Install dependencies
         run: flutter pub get
 
@@ -46,6 +46,6 @@ jobs:
       - name: Run tests
         run: flutter test
 
-      # Build the app (optional, depending on your use case)
-      - name: Build APK
+      # Build the app (optional, you can add other build types like iOS or web)
+      - name: Build APK (release)
         run: flutter build apk --release
