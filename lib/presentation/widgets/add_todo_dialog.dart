@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 class AddTodoDialog extends StatefulWidget {
   final Function(String) onAdd;
 
-  const AddTodoDialog({Key? key, required this.onAdd}) : super(key: key);
+  const AddTodoDialog({super.key, required this.onAdd});
 
   @override
+  // ignore: library_private_types_in_public_api
   _AddTodoDialogState createState() => _AddTodoDialogState();
 }
 

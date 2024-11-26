@@ -9,7 +9,7 @@ import '../widgets/add_todo_dialog.dart';
 import '../../data/models/todo_model.dart';
 
 class TodoScreen extends StatelessWidget {
-  const TodoScreen({Key? key}) : super(key: key);
+  const TodoScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 part 'todo_model.g.dart';
 
 @HiveType(typeId: 0)
+// ignore: must_be_immutable
 class TodoModel extends HiveObject with EquatableMixin {
   @HiveField(0)
   final String id;

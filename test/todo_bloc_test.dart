@@ -103,7 +103,7 @@ void main() {
   blocTest<TodoBloc, TodoState>(
     'emits TodoError when AddTodo fails',
     build: () {
-      final newTodo = createTodo('New Todo');
+      createTodo('New Todo');
 
       when(() => mockRepository.addTodo(any()))
           .thenReturn(const Left('Failed to add todo'));
@@ -142,7 +142,7 @@ void main() {
     'emits updated TodoLoaded when DeleteTodo is successful',
     build: () {
       // Create a todo with a specific, known ID
-      final todoToDelete = createTodo('Todo to Delete', id: '31556755-22c6-4bd9-8e58-beaaadcd3aec');
+      createTodo('Todo to Delete', id: '31556755-22c6-4bd9-8e58-beaaadcd3aec');
 
       when(() => mockRepository.deleteTodo('31556755-22c6-4bd9-8e58-beaaadcd3aec'))
           .thenReturn(const Right(true));

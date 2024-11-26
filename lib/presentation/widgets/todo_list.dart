@@ -7,7 +7,7 @@ import '../blocs/todo/todo_event.dart';
 class TodoList extends StatelessWidget {
   final List<TodoModel> todos;
 
-  const TodoList({Key? key, required this.todos}) : super(key: key);
+  const TodoList({super.key, required this.todos});
 
   @override
   Widget build(BuildContext context) {
