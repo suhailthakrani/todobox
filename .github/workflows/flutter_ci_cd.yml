@@ -1,4 +1,4 @@
-name: Flutter CI/CD
+name: Flutter CI
 
 on:
   push:
@@ -8,25 +8,44 @@ on:
       - release
   pull_request:
     branches:
+      - main
       - dev
       - release
 
 jobs:
-  flutter-build-test:
+  build:
     runs-on: ubuntu-latest
+    
     steps:
+      # Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Set up Flutter
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'stable'
+          flutter-version: 'stable' # You can specify a version or 'stable'
 
+      # Cache Flutter dependencies (optional)
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.pub-cache
+            build/
+          key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-flutter-
+
+      # Install dependencies
       - name: Install dependencies
-        run: |
-          flutter pub get
+        run: flutter pub get
 
+      # Run tests
       - name: Run tests
-        run: |
-          flutter test
+        run: flutter test
+
+      # Build the app (optional, depending on your use case)
+      - name: Build APK
+        run: flutter build apk --release
